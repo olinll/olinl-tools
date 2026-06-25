@@ -1,0 +1,36 @@
+# Cloudflare Workers 配置（Static Assets 模式，用于托管 Nuxt SSG 产物）
+# 文档：https://developers.cloudflare.com/workers/static-assets/
+
+name = "olinl-tools"
+compatibility_date = "2026-06-25"
+# nodejs_compat 为后续 API 路由（视频解析等）做准备
+compatibility_flags = ["nodejs_compat"]
+
+# Workers 观测性，方便在 Dashboard 查看请求/错误
+[observability]
+enabled = true
+
+# ──────────────────────────
+# 静态资源配置：把 nuxt generate 的产物目录托管出去
+# ──────────────────────────
+[assets]
+directory = "./.output/public"
+
+# 路由匹配不到文件时返回 Nuxt 生成的 404.html
+not_found_handling = "404-page"
+
+# 无 Worker 入口脚本，纯静态托管
+run_worker_first = false
+
+# ──────────────────────────
+# 自定义域名（部署后在 Dashboard 绑定或取消注释）
+# ──────────────────────────
+# [[routes]]
+# pattern = "tools.olinl.com"
+# custom_domain = true
+
+# ──────────────────────────
+# 环境变量（暂未使用）
+# ──────────────────────────
+# [vars]
+# SITE_NAME = "Olinl Tools"

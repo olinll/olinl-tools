@@ -1,0 +1,29 @@
+# Nuxt
+.nuxt
+.output
+.data
+dist
+
+# Cloudflare
+.wrangler
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
