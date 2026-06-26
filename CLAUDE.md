@@ -37,22 +37,24 @@ olinl_tools/
 │   ├── home/
 │   │   └── ToolCards.vue      # 工具卡片网格
 │   └── editor/                # MDC 编辑器
-│       ├── MdcEditorPanel.vue    # CodeMirror 6 编辑器面板
-│       ├── MdcPreviewPanel.vue   # MDC 实时预览面板
-│       ├── MdcEditorToolbar.vue  # 工具栏（字数、清空、复制、组件参考）
-│       └── mdc/                  # 12 个 MDC 组件 Tailwind 预览封装
+│       ├── MdcEditorPanel.vue    # CodeMirror 6 编辑器 + 自定义三阶段补全面板
+│       ├── MdcPreviewPanel.vue   # MDC 实时预览（parseMarkdown → MDCRenderer）
+│       ├── MdcEditorToolbar.vue  # 工具栏（字数统计、复制、清空、组件参考弹窗）
+│       ├── MdcComponentSidebar.vue  # 左侧常驻组件参考面板（可折叠/搜索/筛选）
+│       └── mdc/                  # 18 个 MDC 组件 Tailwind 预览封装
 │           ├── AlertPreview.vue / BadgePreview.vue / BlurPreview.vue
-│           ├── FoldingPreview.vue / KeyPreview.vue / QuotePreview.vue
-│           ├── TabPreview.vue / TipPreview.vue / PoetryPreview.vue
-│           ├── CardListPreview.vue / TimelinePreview.vue / CopyPreview.vue
+│           ├── CardListPreview.vue / ChatPreview.vue / CopyPreview.vue
+│           ├── EmojiClockPreview.vue / FoldingPreview.vue / KeyPreview.vue
+│           ├── LinkBannerPreview.vue / LinkCardPreview.vue / PicPreview.vue
+│           ├── PoetryPreview.vue / QuotePreview.vue / TabPreview.vue
+│           ├── TimelinePreview.vue / TipPreview.vue / VideoEmbedPreview.vue
 │
 ├── composables/
 │   ├── useMdcParser.ts       # parseMarkdown() 封装（错误/加载/空状态处理）
-│   ├── useMdcComponents.ts   # MDC 组件注册表（kebab → Vue 组件映射）
-│   └── useMdcAutocomplete.ts # CodeMirror CompletionSource（组件名自动补全）
+│   └── useMdcComponents.ts   # MDC 组件注册表（kebab → Vue 组件 18 个映射）
 │
 ├── types/
-│   └── mdc-components.ts     # 组件元数据定义（Props/插槽/语法类型）
+│   └── mdc-components.ts     # 18 组件元数据（Props/插槽/语法类型/默认值）
 │
 ├── lib/
 │   └── utils.ts               # cn() 工具函数（clsx + tailwind-merge）
@@ -84,7 +86,7 @@ pnpm preview    # 预览生产构建
 | 4 | Diff 工具 | 🔜 待开始 | — | 文本差异对比，左右双栏/统一视图，行级/词级/字符级 |
 | 5 | JSON 格式化 | 🔜 待开始 | — | 使用 [jsoneditor](https://github.com/josdejong/jsoneditor) 封装，Tree/Code/Text/Preview 四种模式 |
 | 6 | 短视频解析器 | 🔜 待开始 | — | 对接 [media-fetch](https://github.com/olinll/media-fetch) API（`http://10.0.0.11:3002/`），解析+文件库+历史 |
-| 7 | MDC 编辑器 | ✅ 完成 | 2026-06-26 | 分栏编辑器（CodeMirror 6 + splitpanes），12 个 MDC 组件 Tailwind 封装，实时预览 + 自动补全 |
+| 7 | MDC 编辑器 | ✅ 完成 | 2026-06-26 | 三栏布局（侧边栏+编辑器+预览），CodeMirror 6 + splitpanes，18 个 MDC 组件封装，三阶段自动补全，暗色模式适配，移动端响应式 |
 
 ## Git 提交规范
 
@@ -114,7 +116,7 @@ pnpm preview    # 预览生产构建
 
 - 所有 UI 组件位于 `components/ui/`，由 `components.json` 注册
 - 使用 `npx shadcn-vue@latest add <component>` 添加新组件
-- 当前已安装：Button, Card, Badge, Separator
+- 当前已安装：Button, Card (CardHeader/CardTitle/CardDescription/CardContent), Badge, Separator, Tabs, Tooltip, Dialog, ScrollArea
 - `components` 配置中使用 `pathPrefix: false`，所有组件可直接以文件名引用（如 `<SiteHeader />` 而非 `<LayoutSiteHeader />`）
 
 ### 主题系统
@@ -138,9 +140,28 @@ pnpm preview    # 预览生产构建
 ## 与 blog-v3 的关系
 
 - **blog-v3** 路径：`E:\Github\blog-v3`
-- blog-v3 是 Nuxt 3 博客，包含 27 个自定义 MDC 组件（Alert, Badge, Pic, Tab, Folding, Timeline, ...）
-- 当前为**独立仓库**，未来 MDC 编辑器阶段将通过 pnpm workspace 引用 blog-v3 组件
-- 共享技术栈：Nuxt 3 + Vue 3 + SCSS + Shiki，可复用配置模式
+- blog-v3 是 Nuxt 3 博客（Clarity 主题），原作者 [纸鹿](https://blog.zhilu.site)，包含 26 个自定义 MDC 组件
+- MDC 编辑器**不直接引用** blog-v3 源码（避免 SCSS/依赖冲突），而是用 Tailwind + shadcn 重写了 18 个预览封装组件
+- 预览通过 `@nuxtjs/mdc/runtime` 的 `parseMarkdown()` 客户端解析 + `MDCRenderer` 渲染
+- 组件注册通过 `MDCRenderer` 的 `components` prop 注入，kebab-case → Vue 组件映射
+
+## 编辑器架构
+
+```
+pages/editor.vue          ← 路由，顶部 Clarity 归属提示条
+├── Splitpanes 三栏
+│   ├── Pane: MdcComponentSidebar   ← 左侧（可折叠，默认收起）
+│   ├── Pane: 编辑器区
+│   │   ├── MdcEditorToolbar        ← 词数·字符 / 📚弹窗 / 复制 / 清空
+│   │   └── MdcEditorPanel         ← CodeMirror 6（CSS 变量主题）
+│   │       └── Teleport 补全面板   ← :: 组件名 → {} 属性 → "" 值 三阶段
+│   └── Pane: MdcPreviewPanel      ← parseMarkdown → MDCRenderer
+├── 移动端 → Tabs（编辑/预览切换）
+```
+
+**关键依赖**：splitpanes、@nuxtjs/mdc、@codemirror/lang-markdown、@codemirror/view、@codemirror/state、@codemirror/language、@tailwindcss/typography、@vueuse/core
+
+**暗色模式**：CodeMirror 使用 shadcn CSS 变量（`--foreground`/`--background`），无需重建编辑器即可跟随主题切换
 
 ## 部署
 
