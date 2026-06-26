@@ -28,13 +28,31 @@ olinl_tools/
 │   │   ├── Button.vue
 │   │   ├── Card.vue / CardHeader.vue / CardTitle.vue / CardDescription.vue / CardContent.vue
 │   │   ├── Badge.vue
-│   │   └── Separator.vue
+│   │   ├── Separator.vue
+│   │   └── tabs/ / tooltip/ / dialog/ / scroll-area/  # 编辑器配套组件
 │   ├── layout/                # 布局组件
 │   │   ├── SiteHeader.vue     # 顶栏（logo + 主题切换）
 │   │   ├── SiteFooter.vue     # 底栏
 │   │   └── ThemeToggle.vue    # 亮/暗模式切换
-│   └── home/
-│       └── ToolCards.vue      # 工具卡片网格
+│   ├── home/
+│   │   └── ToolCards.vue      # 工具卡片网格
+│   └── editor/                # MDC 编辑器
+│       ├── MdcEditorPanel.vue    # CodeMirror 6 编辑器面板
+│       ├── MdcPreviewPanel.vue   # MDC 实时预览面板
+│       ├── MdcEditorToolbar.vue  # 工具栏（字数、清空、复制、组件参考）
+│       └── mdc/                  # 12 个 MDC 组件 Tailwind 预览封装
+│           ├── AlertPreview.vue / BadgePreview.vue / BlurPreview.vue
+│           ├── FoldingPreview.vue / KeyPreview.vue / QuotePreview.vue
+│           ├── TabPreview.vue / TipPreview.vue / PoetryPreview.vue
+│           ├── CardListPreview.vue / TimelinePreview.vue / CopyPreview.vue
+│
+├── composables/
+│   ├── useMdcParser.ts       # parseMarkdown() 封装（错误/加载/空状态处理）
+│   ├── useMdcComponents.ts   # MDC 组件注册表（kebab → Vue 组件映射）
+│   └── useMdcAutocomplete.ts # CodeMirror CompletionSource（组件名自动补全）
+│
+├── types/
+│   └── mdc-components.ts     # 组件元数据定义（Props/插槽/语法类型）
 │
 ├── lib/
 │   └── utils.ts               # cn() 工具函数（clsx + tailwind-merge）
@@ -66,7 +84,7 @@ pnpm preview    # 预览生产构建
 | 4 | Diff 工具 | 🔜 待开始 | — | 文本差异对比，左右双栏/统一视图，行级/词级/字符级 |
 | 5 | JSON 格式化 | 🔜 待开始 | — | 使用 [jsoneditor](https://github.com/josdejong/jsoneditor) 封装，Tree/Code/Text/Preview 四种模式 |
 | 6 | 短视频解析器 | 🔜 待开始 | — | 对接 [media-fetch](https://github.com/olinll/media-fetch) API（`http://10.0.0.11:3002/`），解析+文件库+历史 |
-| 7 | MDC 编辑器 | 🔜 待开始 | — | 博客文章编辑器，集成 [blog-v3](E:\Github\blog-v3) 的 27 个 MDC 组件实时预览 |
+| 7 | MDC 编辑器 | ✅ 完成 | 2026-06-26 | 分栏编辑器（CodeMirror 6 + splitpanes），12 个 MDC 组件 Tailwind 封装，实时预览 + 自动补全 |
 
 ## Git 提交规范
 

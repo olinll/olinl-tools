@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
+    '@nuxtjs/mdc',
   ],
   colorMode: {
     classSuffix: '',
@@ -27,5 +28,15 @@ export default defineNuxtConfig({
   },
   typescript: {
     strict: true,
+  },
+  // MDC configuration
+  mdc: {
+    highlight: {
+      theme: {
+        default: 'github-dark',
+        dark: 'github-dark',
+        light: 'github-light',
+      },
+    },
   },
 })
